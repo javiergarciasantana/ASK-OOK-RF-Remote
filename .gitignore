@@ -1,6 +1,10 @@
 # For PCBs designed using KiCad: https://www.kicad.org/
 # Format documentation: https://kicad.org/help/file-formats/
 
+
+./rf_remote_EV1527-backups
+.DS_Store
+*.lck
 # Temporary files
 *.000
 *.bak
