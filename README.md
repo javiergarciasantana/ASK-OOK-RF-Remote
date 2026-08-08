@@ -91,15 +91,15 @@ Every time you press a button on an EV1527 keyfob, the chip transmits a 24-bit f
 #### Mathematical Combinations:
 $$\text{Total Address Combinations} = 2^{20} = 1,048,576$$
 
-With over 1 million unique code combinations, the probability of your keyfob sharing the exact same address code with another device nearby is roughly 1 in 1.05 million.
+With over 1 million unique code combinations, the probability of the keyfob sharing the exact same address code with another device nearby is roughly 1 in 1.05 million.
 
 ---
 
 ### Why OTP Encoding is the Best Choice for the Keyfob
 
-* **Saves Board Space & Cost:** Eliminating DIP switches or solder jumper banks drastically shrinks your PCB area—allowing you to fit the EV1527 easily on your compact $37 \times 23.4\text{ mm}$ layout.
+* **Saves Board Space & Cost:** Eliminating DIP switches or solder jumper banks drastically shrinks the PCB area—allowing us to fit the EV1527 easily on the small board layout
 * **Zero Serial Management During Assembly:** You don't have to program microcontrollers or keep track of serial numbers when soldering. Every EV1527 chip off the reel is guaranteed to have a different hardcoded address straight out of the box.
-* **Universal Receiver Compatibility:** Modern RF receivers (like learning-code receivers) use a simple pairing button. You press "Learn" on the receiver, press your keyfob button once, and the receiver saves your unique 20-bit ID into its memory.
+* **Universal Receiver Compatibility:** Modern RF receivers (learning-code receivers like the one I have) use a simple pairing button. You press "Learn" on the receiver, press your keyfob button once, and the receiver saves your unique 20-bit ID into its memory.
 
 ---
 
@@ -112,7 +112,49 @@ The EV1527 does not require a crystal oscillator, crystal load capacitors, or an
 * **How It Works:** The resistance value of $R_{OSC}$ determines the charge/discharge rate of the internal oscillator, setting the timing pulse width ($T_w$) for the transmitted ASK radio signal.
 
 
-## ASK Transmitting
+## ASK/OOK Modulation
+
+**ASK** stands for **Amplitude Shift Keying**, and **OOK** stands for **On-Off Keying**. OOK is the simplest form of ASK modulation used in low-power wireless communication.
+
+* **How It Works:** Rather than shifting frequencies (like FM/FSK), OOK represents digital data by turning the radio transmitter **ON** and **OFF**:
+  * **Binary '1' (Mark):** The transmitter turns ON and emits a full-power $433.92\text{ MHz}$ carrier wave.
+  * **Binary '0' (Space):** The transmitter turns completely OFF, emitting zero radio power ($0\text{ V}$).
+* **Why It Is Popular:** Because transmitting a '0' consumes virtually zero current, OOK is extremely power-efficient. Combined with low hardware complexity, it is the ideal choice for battery-powered keyfobs and garage door openers.
+
+---
+
+### Switching from SYN115 to CMT2110A
+
+#### 1. The Initial Choice: SYN115
+The SYN115 was initially selected because it is a widely recognized 433 MHz ASK transmitter IC. However, reviewing its datasheet revealed that it requires a significant number of external passive components to function, including crystal load capacitors, external biasing networks, and multi-stage tuning circuits, which inflates both component cost and PCB space requirements.
+
+* **Datasheet:** [SYN115 Datasheet](./docs/SYN113-SYN115-datasheet-version-1-1-.0.pdf)
+
+#### 2. The Solution: CMT2110A
+To keep the keyfob layout compact ($37 \times 23.4\text{ mm}$), the design was shifted to the **CMT2110A**. Thanks to its high level of internal silicon integration (integrated crystal load caps, bias circuits, and internal EEPROM power control), the entire RF section requires only:
+
+* **2 Inductors:** 
+  * $L_1$ (DC supply choke)
+  * $L_2$ (Series matching inductor)
+* **3 Capacitors:** 
+  * $C_0$ (Power decoupling filter)
+  * $C_1$ (Series DC blocking capacitor)
+  * $C_2$ (Shunt harmonic filter capacitor)
+* **1 Quartz Crystal:** 
+  * A standard 4-pin SMD $26\text{ MHz}$ crystal package (where 1 pin carries the active clock signal to the `XTAL` pin, while the remaining grounded pins provide internal shield grounding).
+
+* **Datasheet:** [CMT2110A Datasheet](./docs/info-rf-cmt2110a-esr.pdf)
+
+---
+
+### Why is 433.92 MHz Used?
+
+The $433.92\text{ MHz}$ frequency band is the dominant standard for short-range remote controls due to four key advantages:
+
+1. **Unlicensed ISM Band:** $433.05\text{ MHz} - 434.79\text{ MHz}$ is designated worldwide as an Industrial, Scientific, and Medical (ISM) band. Devices operating under short-range, low-duty-cycle rules can transmit without requiring expensive FCC/CE user licenses.
+2. **Superior Obstacle Penetration:** Sub-1 GHz signals ($433\text{ MHz}$) have longer wavelengths ($\approx 69\text{ cm}$) compared to $2.4\text{ GHz}$ (Wi-Fi/Bluetooth, $\approx 12\text{ cm}$). This allows $433\text{ MHz}$ signals to easily penetrate walls, plastic key shells, and human hands with minimal signal attenuation.
+3. **Ultra-Low Battery Consumption:** At $433.92\text{ MHz}$, simple power amplifiers consume very little current ($\approx 10 - 20\text{ mA}$ during transmission), enabling years of operation on a single CR2032 coin cell.
+4. **Ideal Antenna Physical Size:** A standard quarter-wave antenna at $433\text{ MHz}$ is roughly $17\text{ cm}$, which easily scales down into compact PCB trace loop antennas suitable for handheld keyfobs while maintaining reliable range ($30 - 100\text{ meters}$).
 
 ## Schema Design
 
