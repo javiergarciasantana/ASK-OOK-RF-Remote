@@ -1,14 +1,17 @@
 # ASK-OOK-RF-Remote
 Design files for my 433MHz RF remote specifically made to fit into VW Transporter T5/ Golf MK6 2 Button key fob casing.
 
+<p align="center">
 <img width="504" height="509" alt="image" src="https://github.com/user-attachments/assets/425fc9b4-2674-4d23-b306-9cf5dcd9df62" />
+</p>
 
 ## Introduction
 
-The "key" to this project is to make a functional all-in-one remote key-fob for my VW Polo 6n2. My car came from factory with a key-fob (6N0837219AC) which only had a button for a light to help you find the door or ignition lock. Said key looked like this:
+The *"key"* to this project is to make a functional all-in-one remote key-fob for my VW Polo 6n2. My car came from factory with a key-fob (6N0837219AC) which only had a button for a light to help you find the door or ignition lock. Said key looked like this:
 
+<p align="center">
 <img width="519" height="397" alt="image" src="https://github.com/user-attachments/assets/bfd34f51-d015-430f-b8ec-0965a43cdf0d" />
-
+</p>
 
 Additionally, my car came with a 3rd party alarm system installed from the dealer which I assume used a 433MHz additional remote with a rolling code protocol.
 
@@ -27,11 +30,18 @@ The remote issue I solved by getting another kind of separate remote and to this
 
 Here is an image of my current key setup:
 
-<img width="484" height="642" alt="image" src="https://github.com/user-attachments/assets/3cafcbd2-ceb8-4d3e-862a-5b8d9130c2a2" />
+<img width="484" height="642" alt="image" src="https://github.com/user-attachments/assets/3cafcbd2-ceb8-4d3e-862a-5b8d9130c2a2" /><img width="200" height="200" alt="image" src="https://github.com/user-attachments/assets/c88b6961-7fcc-4871-9c07-1701685563cb" />
+<img width="302" height="318" alt="image" src="https://github.com/user-attachments/assets/6e70c98b-75f5-4e74-b980-19243f82ce01" />
 
-As you can see, it doesn't look half bad, however, since I am always carrying many things in my hand and other keys (plus the keychain and remote make noise everytime I hit a road bump). I wanted an all-in-one OEM+ solution. For this I started looking at Golf MK4, MK6 & MK7 remotes and decided to go with the MK6 one. I now is rather bland but its in the middle from being too futuristic(MK7) or too dingy(MK4). 
 
-The good thing is that all remotes share the same HU66 blade and fit on the same kind of cylinder lock, however the transponder is not the same!!! I had to install a new ID44 chip on my new key-fob. 
+As you can see, it doesn't look half bad, however, since I am always carrying many things in my hand and other keys (plus the keychain and remote make noise everytime I hit a road bump), I wanted an all-in-one OEM+ solution. For this I started looking at Golf MK4, MK6 & MK7 remotes and decided to go with the MK6 one. I now is rather bland but its in the middle from being too futuristic(MK7) or too dingy(MK4). 
+
+<img width="340" height="272" alt="image" src="https://github.com/user-attachments/assets/09b69dc5-83b3-4f2b-b0c5-9cd849dffffa" />
+<img width="302" height="318" alt="image" src="https://github.com/user-attachments/assets/6e70c98b-75f5-4e74-b980-19243f82ce01" />
+<img width="175" height="334" alt="image" src="https://github.com/user-attachments/assets/e0fad442-4397-4897-aa40-1a659cb04683" />
+
+
+The good thing is that all remotes can share the same HU66 blade and fit on the same kind of cylinder lock, however the transponder is not the same!!! I had to install a new ID44 chip on my new key-fob. 
 
 [Link to the 2 button Golf MK6 key-fob](https://es.aliexpress.com/item/1005005737683184.html?spm=a2g0o.order_list.order_list_main.17.595b1802jJVIsa&gatewayAdapt=glo2esp)
 
@@ -158,10 +168,28 @@ The $433.92\text{ MHz}$ frequency band is the dominant standard for short-range 
 
 ## Schema Design
 
+Now this was perhaps one of the most challenging steps as I did not know anything about Kicad beforehand. I watched a couple videos after choosing all of my components and I was ready to go. I satarted placing symbolds, common GND and added some jumpers for the buttons, just in case, so that I can change the input in case my receiver expects a different data input (1000 instead of 0001 or 0100 instead of 0010). Which depends on what input you give power to (K0-K3).
+
+Now since the remote requires a cr2032 holder, I added its symbol (I put is as Do not populate, this is explained in the PCB design chapter) as well as the components required by the datasheets (combination of 0402 and 0603 LED, resistors, capacitors and inductors and a 4 pin Crystal). 
+
+The LED is required in order to know wether the remote is working or not, and I added it in the TDX-DATA line between the EV1527 and the CMT2110A
+
+<img width="551" height="609" alt="image" src="https://github.com/user-attachments/assets/d50df384-7135-4cd0-82a5-7b2a7a0203c8" />
+
+Lastly, according to the CMT2110A datasheet, the CLK pin must remain disconnected as its only used to access the embedded EEPROM and change the IC's operational frequency and other parameters
+
+<img width="455" height="284" alt="image" src="https://github.com/user-attachments/assets/c599b76e-c7a7-488e-8add-bc361dbca56a" />
 
 ## PCB Design
 
+<img width="427" height="630" alt="image" src="https://github.com/user-attachments/assets/b1399f4b-9be0-4ae0-870f-bd5fc80de37e" /><img width="489" height="617" alt="image" src="https://github.com/user-attachments/assets/7d6f87d2-7746-41b5-9323-dcc52e1f1b61" />
+
+
+
 ## Breadboard Prototype
+
+<img width="523" height="582" alt="image" src="https://github.com/user-attachments/assets/f1c6886d-8b56-4051-b937-3216ea07ec02" />
+
 
 ## Final Results
 
