@@ -184,7 +184,67 @@ Lastly, according to the CMT2110A datasheet, the CLK pin must remain disconnecte
 
 <img width="427" height="630" alt="image" src="https://github.com/user-attachments/assets/b1399f4b-9be0-4ae0-870f-bd5fc80de37e" /><img width="489" height="617" alt="image" src="https://github.com/user-attachments/assets/7d6f87d2-7746-41b5-9323-dcc52e1f1b61" />
 
+This was perhaps the most stressful part, as placing the components correctly and designling an antena trace that will work on real life is very challenging
+I started taking meassurements of the original board to know exactly where to place the switches and antenna components.
 
+### Antenna design
+
+<img width="737" height="211" alt="image" src="https://github.com/user-attachments/assets/a6fb54dd-8f5f-46a5-973c-0e3a29b727c2" />
+
+To design an antenna, firstly we have to position these components correctly, according to the datasheet, capacitor C0 needs to be as close as possible to the RFO pin on the chip for better filtering. Now the antenna circuit by itself can look a bit complex but its really simple:
+
+#### 1. Impedance Matching (Maximum Power Transfer)
+The output pin of the IC (RFO) has a specific internal electrical impedance (often several hundred ohms). A compact PCB keyfob antenna has a completely different impedance (typically low and highly reactive, e.g., $10\ \Omega - 50\ \Omega$).If you connect the pin straight to the antenna, an impedance mismatch occurs: over 90% of the radio power reflects back into the chip instead of radiating into the air. The LC network ($L_2, C_2, C_1$) acts as an RF transformer to match the two impedances so maximum power enters the antenna.
+#### 2. Harmonic Suppression (Filtering Noise)The Power Amplifier (PA) inside the chip operates like a high-speed switch. This generates the main $433.92\text{ MHz}$ signal along with unwanted square-wave harmonics at multiples of the frequency ($867.84\text{ MHz}$, $1.3\text{ GHz}$, etc.). The LC components form a low-pass filter that strips out these higher frequencies so the board complies with legal radio emission limits (CE/FCC).
+
+#### 3. DC Power Feeding ($L_1$ Choke)The output transistor inside the CMT2110A requires DC voltage from the battery to operate. $L_1$ allows direct DC current from $V_{DD}$ to flow into the RFO pin while acting as a "wall" (high impedance) to $433.92\text{ MHz}$ RF, keeping the radio signal from leaking back into the battery line.
+
+#### 4. DC Blocking ($C_2$)Capacitor $C_2$ sits in series right before the antenna trace. It allows $433.92\text{ MHz}$ AC radio waves to pass through to the antenna while stopping DC voltage from reaching the antenna trace, preventing short circuits if the antenna touches a grounded frame or case.
+
+#### Antenna trace
+
+The antenna circuit also needs a trace (or a coil). This one was designed using the **Quarter-Wave Monopole ($\lambda/4$) Rule**, adjusted for the **velocity factor** of the FR4 PCB substrate, and routed using a **Meander Line Antenna (MLA)** topology.
+
+---
+
+##### 1. Quarter-Wavelength ($\lambda/4$) Resonant Length
+Antennas achieve optimum resonance when their physical length corresponds to one-quarter of the target RF wavelength ($\lambda/4$). 
+
+At $433.92\text{ MHz}$, the wavelength in free space is calculated as:
+
+$$\lambda = \frac{c}{f} = \frac{3 \times 10^8\text{ m/s}}{433.92 \times 10^6\text{ Hz}} \approx 691.4\text{ mm}$$
+
+In open air, a standard quarter-wave antenna requires a total length of:
+
+$$\text{Length}_{\text{air}} = \frac{691.4\text{ mm}}{4} \approx 172.8\text{ mm}$$
+
+---
+
+##### 2. PCB Velocity Factor Adjustment
+Radio waves travel slower through an FR4 substrate ($\epsilon_r \approx 4.4$) than through open air. This effective dielectric loading introduces a **velocity factor** ($v_f \approx 0.70$), which reduces the physical trace length required to achieve $433.92\text{ MHz}$ resonance:
+
+$$\text{Physical Trace Length} = 172.8\text{ mm} \times 0.70 \approx 120\text{ mm}$$
+
+By designing a total trace path of **$120\text{ mm}$**, the trace electrically matches a full $172.8\text{ mm}$ quarter-wave antenna radiating in free space.
+
+---
+
+##### 3. Meander Line Antenna (MLA) Geometry
+A straight $120\text{ mm}$ trace cannot fit across a compact $37 \times 23.4\text{ mm}$ keyfob board. 
+
+To solve this, a **meander line pattern** (a serpentine topology consisting of 7 vertical $12\text{ mm}$ segments and 7 horizontal $3\text{ mm}$ turns) was used. This layout maintains the continuous **$120\text{ mm}$ electrical path length** needed for proper resonance while compressing the physical footprint into a small bounding box.
+
+---
+
+##### 4. Trace Width Selection ($1\text{ mm}$)
+Unlike narrow $0.2\text{ mm}$ logic traces, a wider **$1\text{ mm}$ width** was chosen for the antenna trace for two specific reasons:
+
+* **Lower RF Conduction Loss:** At $433.92\text{ MHz}$, high-frequency currents travel primarily on the outer surface layer of copper (*skin effect*). A wider $1\text{ mm}$ trace increases surface area, significantly reducing high-frequency resistive losses.
+* **Broader Impedance Bandwidth:** Increasing trace width widens the resonant frequency band, preventing the keyfob from detuning when encapsulated inside a plastic key shell or touched by a user's hand.
+
+##### 5. No copper fill on the back of the antenna
+
+To prevent any interference with the signal, the antenna needs to be isolated, with as little components of signals close to it, so that no power gets harnessed from the signal.
 
 ## Breadboard Prototype
 
